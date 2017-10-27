@@ -64,7 +64,7 @@ public abstract class BlocksEditor<S extends SourceNode, T extends DesignerEdito
   protected final S blocksNode;
 
   // Panel that is used as the content of the palette box
-  protected final SimplePalettePanel palettePanel;
+  protected SimplePalettePanel palettePanel;
 
   // Blocks area. Note that the blocks area is a part of the "document" in the
   // browser (via the deckPanel in the ProjectEditor). So if the document changes (which happens
@@ -76,7 +76,7 @@ public abstract class BlocksEditor<S extends SourceNode, T extends DesignerEdito
 
   // projectid_formname for this blocks editor. Our index into the static formToBlocksEditor map.
   protected final String entityName;
-  protected final T designer;
+  protected T designer;
 
   // References to other panels that we need to control.
   private final SourceStructureExplorer sourceStructureExplorer;
@@ -142,9 +142,22 @@ public abstract class BlocksEditor<S extends SourceNode, T extends DesignerEdito
           return new DropTarget[0];
         }
       });
-    } else {
-      palettePanel = null;
-      OdeLog.wlog("Can't get designer for blocks: " + getFileId());
+    }
+  }
+
+  public void setDesigner(T designer) {
+    if (this.designer == designer) {
+      return;
+    }
+    this.designer = designer;
+    if (designer != null) {
+      palettePanel = designer.getComponentPalettePanel().copy();
+      palettePanel.loadComponents(new DropTargetProvider() {
+        @Override
+        public DropTarget[] getDropTargets() {
+          return new DropTarget[0];
+        }
+      });
     }
   }
 

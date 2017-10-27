@@ -122,7 +122,8 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   private void loadBlocksEditor(String formNamePassedIn) {
 
     final String formName = formNamePassedIn;
-    final BlocksEditor<?, ?> newBlocksEditor = editorMap.get(formName).blocksEditor;
+    final BlocksEditor<?, DesignerEditor<?, ?, ?, ?>> newBlocksEditor = (BlocksEditor) editorMap.get(formName).blocksEditor;
+    newBlocksEditor.setDesigner(editorMap.get(formName).formEditor);
     newBlocksEditor.loadFile(new Command() {
         @Override
         public void execute() {
@@ -421,8 +422,6 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
   
   private void addDesigner(final String entityName, final DesignerEditor<?, ?, ?, ?> newDesigner) {
-    addFileEditor(newDesigner);
-    OdeLog.log("Adding designer for " + entityName);
     if (editorMap.containsKey(entityName)) {
       // This happens if the blocks editor was already added.
       editorMap.get(entityName).formEditor = newDesigner;
@@ -463,8 +462,6 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
 
   private void addBlocksEditor(String entityName, final BlocksEditor<?, ?> newBlocksEditor) {
-    addFileEditor(newBlocksEditor);
-    OdeLog.log("Adding blocks editor for " + entityName);
     if (editorMap.containsKey(entityName)) {
       // This happens if the form editor was already added.
       editorMap.get(entityName).blocksEditor = newBlocksEditor;
