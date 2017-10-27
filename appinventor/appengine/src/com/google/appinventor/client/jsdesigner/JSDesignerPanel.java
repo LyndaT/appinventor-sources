@@ -22,8 +22,10 @@ public class JSDesignerPanel extends HTMLPanel {
   private FileEditor fileEditor;
 
   public JSDesignerPanel() {
-    super("<div id=\"root\"></div>");
-    ScriptInjector.fromUrl("main.9de011e5.js").inject();
+    super("<div id=\"app\"></div>");
+    //ScriptInjector.fromUrl("main.9de011e5.js").inject();
+    ScriptInjector.fromUrl("main.js").inject();
+    //ScriptInjector.fromUrl("0.js").inject();
   }
 
   public void show() {
@@ -49,13 +51,20 @@ public class JSDesignerPanel extends HTMLPanel {
       }
       flattenedArray.push(component);
     }
-    $wnd.jsDesignerLoadProject(flattenedArray);
+    $wnd.jsDesignerLoadProject(rawFileContent);
+  }-*/;
+
+  private static void loadProjectFromFile()/*-{
+    openProjectInJSDesigner(fileEditor.getRawFileContent());
   }-*/;
 
   public native void exportJSFunctions()/*-{
     $wnd.jsDesignerToJS = {
       getProjectJSON: $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getProjectJSON()).bind(this))
     };
+    $wnd.jsDesignerLoadProjectFromFile = {
+      $entry(@com.google.appinventor.client.jsdesigner.JSDesignerPanel::loadProjectFromFile());
+    }
   }-*/;
 
   public String getProjectJSON() {

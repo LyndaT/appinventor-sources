@@ -77,7 +77,7 @@ public class YoungAndroidSourceAnalyzer {
     int beginningOfJsonSection = source.lastIndexOf(jsonSectionPrefix);
     if (beginningOfJsonSection == -1) {
       throw new IllegalArgumentException(
-          "Unable to parse file - cannot locate beginning of $JSON section");
+          "Unable to parse file - cannot locate beginning of $JSON section" + source);
     }
     beginningOfJsonSection += jsonSectionPrefix.length();
 

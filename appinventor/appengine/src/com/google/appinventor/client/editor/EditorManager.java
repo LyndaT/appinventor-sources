@@ -267,7 +267,7 @@ public final class EditorManager {
     for (FileEditor fileEditor : fileEditorsToSave) {
       String rawFileContent = fileEditor.getProjectId() == currentFileEditor.getProjectId() ?
         getJSDesignerRawFileContent() : fileEditor.getRawFileContent();
-      Window.alert(rawFileContent);
+      //Window.alert(rawFileContent);
       FileDescriptorWithContent fileContent = new FileDescriptorWithContent(
           fileEditor.getProjectId(), fileEditor.getFileId(), rawFileContent);
       filesToSave.add(fileContent);
