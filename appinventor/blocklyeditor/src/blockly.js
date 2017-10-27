@@ -149,7 +149,7 @@ Blockly.onKeyDown_ = (function(f) {
         target = parent;
       }
       // check that the main workspace's parent is the target injection div (if any)
-      if (Blockly.mainWorkspace.getParentSvg().parentNode == target) {
+      if (Blockly.mainWorkspace.getParentSvg() && Blockly.mainWorkspace.getParentSvg().parentNode == target) {
         f.call(this, e);
       }
     };
