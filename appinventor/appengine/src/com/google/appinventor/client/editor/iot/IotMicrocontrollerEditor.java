@@ -18,6 +18,8 @@ import com.google.appinventor.client.widgets.dnd.DropTarget;
 import com.google.appinventor.client.widgets.properties.EditableProperties;
 import com.google.appinventor.shared.properties.json.JSONObject;
 import com.google.appinventor.shared.rpc.project.iot.IotMicrocontrollerNode;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONNumber;
@@ -111,9 +113,19 @@ public class IotMicrocontrollerEditor extends DesignerEditor<IotMicrocontrollerN
     PaletteBox paletteBox = PaletteBox.getPaletteBox();
     paletteBox.setContent(palettePanel);
 
-    root.addDesignerChangeListener(this);
-    root.addDesignerChangeListener((BlocksEditor<?, ?>) projectEditor.getFileEditor(sourceNode.getEntityName(), BlocksEditor.EDITOR_TYPE));
-    super.loadDesigner();
+    BlocksEditor<?, ?> blocksEditor = (BlocksEditor<?, ?>) projectEditor.getFileEditor(sourceNode.getEntityName(), BlocksEditor.EDITOR_TYPE);
+    if (blocksEditor != null) {
+      root.addDesignerChangeListener(this);
+      root.addDesignerChangeListener(blocksEditor);
+      super.loadDesigner();
+    } else {
+      Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+        @Override
+        public void execute() {
+          loadDesigner();
+        }
+      });
+    }
   }
 
   protected String encodeMicrocontrollerAsJsonString() {
