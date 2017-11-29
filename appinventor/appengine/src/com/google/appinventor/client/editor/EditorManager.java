@@ -230,10 +230,25 @@ public final class EditorManager {
     }
   }
 
-  public native String getJSDesignerRawFileContent() /*-{
-    var aiaFormatedComponents = $wnd.getComponentsInAIAFileFormat();
-    if (aiaFormatedComponents !== undefined && aiaFormatedComponents !== null) {
-      return aiaFormatedComponents;
+
+  // public native String getJSDesignerRawFileContent() /*-{
+  //   var screenFileContent = $wnd.getScreenFileContent();
+  //   console.log("getting Screen File Content from React");
+  //   console.log(screenFileContent);
+  //   if (screenFileContent !== undefined && screenFileContent !== null) {
+  //     return screenFileContent;
+  //   } else {
+  //     return "";
+  //   }
+  // }-*/;
+
+
+  public native String getJSDesignerSelectedScreenContent(String screenName, String screenType) /*-{
+    var screenFileContent = $wnd.getSelectedScreenFileContent(screenName, screenType);
+    console.log("getting Screen File Content from React");
+    console.log(screenFileContent);
+    if (screenFileContent !== undefined && screenFileContent !== null) {
+      return screenFileContent;
     } else {
       return "";
     }
@@ -253,6 +268,7 @@ public final class EditorManager {
    */
   public void saveDirtyEditors(final Command afterSaving) {
     // Note, We don't do any saving if we are in read only mode
+    // Window.alert("Saving dirty Editors")
     if (Ode.getInstance().isReadOnly()) {
       afterSaving.execute();
       return;
@@ -265,9 +281,15 @@ public final class EditorManager {
     Set<FileEditor> fileEditorsToSave = dirtyFileEditors;
     fileEditorsToSave.add(currentFileEditor);
     for (FileEditor fileEditor : fileEditorsToSave) {
+      String fileName = fileEditor.getFileId().substring(fileEditor.getFileId().lastIndexOf("/")+1);
+      String screenName = fileName.substring(0, fileName.lastIndexOf("."));
+      String screenType = fileName.substring(fileName.lastIndexOf(".")+1);
+      // Window.alert(fileEditor.getFileId());
+      // Window.alert(Integer.toString(fileEditor.getFileId().lastIndexOf("/")));
+      // Window.alert(fileEditor.getFileId().substring(fileEditor.getFileId().lastIndexOf("/")+1));
       String rawFileContent = fileEditor.getProjectId() == currentFileEditor.getProjectId() ?
-        getJSDesignerRawFileContent() : fileEditor.getRawFileContent();
-      //Window.alert(rawFileContent);
+        getJSDesignerSelectedScreenContent(screenName, screenType) : fileEditor.getRawFileContent();
+      Window.alert(rawFileContent);
       FileDescriptorWithContent fileContent = new FileDescriptorWithContent(
           fileEditor.getProjectId(), fileEditor.getFileId(), rawFileContent);
       filesToSave.add(fileContent);

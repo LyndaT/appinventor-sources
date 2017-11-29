@@ -94,6 +94,8 @@ public abstract class BlocksEditor<S extends SourceNode, T extends DesignerEdito
   // blocks area again.
   private Set<String> componentUuids = new HashSet<String>();
 
+  private String jsRawFileContent = "";
+
   /**
    * Creates a {@code FileEditor} instance.
    *
@@ -132,6 +134,7 @@ public abstract class BlocksEditor<S extends SourceNode, T extends DesignerEdito
     BlockSelectorBox.getBlockSelectorBox().addBlockDrawerSelectionListener(this);
 
     // Create palettePanel, which will be used as the content of the PaletteBox.
+    OdeLog.log(blocksNode.getEntityName());
     designer = (T) projectEditor.getFileEditor(blocksNode.getEntityName(), DesignerEditor.EDITOR_TYPE);
     if (designer != null) {
       palettePanel = designer.getComponentPalettePanel().copy();
@@ -214,6 +217,7 @@ public abstract class BlocksEditor<S extends SourceNode, T extends DesignerEdito
     blocksArea.renameComponent(uuid, oldName, newName);
   }
 
+
   // FileEditor implementation
   @Override
   public void loadFile(final Command afterFileLoaded) {
@@ -225,6 +229,7 @@ public abstract class BlocksEditor<S extends SourceNode, T extends DesignerEdito
         String blkFileContent;
         try {
           blkFileContent = result.getContent();
+          jsRawFileContent = blkFileContent;
         } catch (ChecksumedFileException e) {
           this.onFailure(e);
           return;
@@ -262,7 +267,8 @@ public abstract class BlocksEditor<S extends SourceNode, T extends DesignerEdito
 
   @Override
   public String getRawFileContent() {
-    return blocksArea.getBlocksContent();
+    //return blocksArea.getBlocksContent();
+    return jsRawFileContent;
   }
 
   @Override
@@ -417,16 +423,19 @@ public abstract class BlocksEditor<S extends SourceNode, T extends DesignerEdito
       // start with no component selected in sourceStructureExplorer. We
       // don't want a component drawer open in the blocks editor when we
       // come back to it.
-      updateBlocksTree(root, null);
 
-      Ode.getInstance().getWorkColumns().remove(Ode.getInstance().getStructureAndAssets()
-          .getWidget(2));
-      Ode.getInstance().getWorkColumns().insert(Ode.getInstance().getStructureAndAssets(), 1);
-      Ode.getInstance().getStructureAndAssets().insert(BlockSelectorBox.getBlockSelectorBox(), 0);
-      BlockSelectorBox.getBlockSelectorBox().setVisible(true);
-      AssetListBox.getAssetListBox().setVisible(true);
-      blocksArea.injectWorkspace();
-      hideBlocksDrawer();
+
+      // React App Inventor, since this is being loaded on React, we don't need it
+      // updateBlocksTree(root, null);
+
+      // Ode.getInstance().getWorkColumns().remove(Ode.getInstance().getStructureAndAssets()
+      //     .getWidget(2));
+      // Ode.getInstance().getWorkColumns().insert(Ode.getInstance().getStructureAndAssets(), 1);
+      // Ode.getInstance().getStructureAndAssets().insert(BlockSelectorBox.getBlockSelectorBox(), 0);
+      // BlockSelectorBox.getBlockSelectorBox().setVisible(true);
+      // AssetListBox.getAssetListBox().setVisible(true);
+      // blocksArea.injectWorkspace();
+      // hideBlocksDrawer();
     } else {
       OdeLog.wlog("Can't get designer for blocks: " + getFileId());
     }

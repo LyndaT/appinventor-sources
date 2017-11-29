@@ -16,10 +16,18 @@ import com.google.appinventor.client.editor.designer.DesignerEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.Ode;
+import com.google.appinventor.client.output.OdeLog;
+import com.google.appinventor.client.DesignToolbar.DesignProject;
+import com.google.appinventor.client.DesignToolbar.Screen;
 
 
 public class JSDesignerPanel extends HTMLPanel {
   private FileEditor fileEditor;
+
+  private String fileContent;
+
+  private String designFileContent;
+  private String blocksFileContent;
 
   public JSDesignerPanel() {
     super("<div id=\"app\"></div>");
@@ -35,11 +43,31 @@ public class JSDesignerPanel extends HTMLPanel {
   public void loadFile(FileEditor fileEditor) {
     this.fileEditor = fileEditor;
     exportJSFunctions();
-    openProjectInJSDesigner(fileEditor.getRawFileContent());
+
+    // Get the screen 
+    DesignProject project = Ode.getInstance().getDesignToolbar().getCurrentProject();
+    Screen currentScreen = project.screens.get(project.currentScreen);
+    FileEditor designerEditor = currentScreen.designerEditor;
+    FileEditor blocksEditor = currentScreen.blocksEditor;
+
+    Window.alert(designerEditor.getFileId());
+    Window.alert(blocksEditor.getFileId());
+
+    this.designFileContent = designerEditor.getRawFileContent();
+    this.blocksFileContent = blocksEditor.getRawFileContent();
+
+    OdeLog.log(designFileContent);
+    OdeLog.log(blocksFileContent);
+
+    this.fileContent = fileEditor.getRawFileContent();
+
+    //openProjectInJSDesigner(fileEditor.getRawFileContent());
   }
 
-  public native void openProjectInJSDesigner(String rawFileContent)/*-{
-    var parsedJson = JSON.parse(rawFileContent.replace(/^\#\|\s\$JSON/, "").replace(/\|\#$/, "").replace(/\$Name/g, "name").replace(/\$Type/g, "componentType").replace(/\$Version/g, "version").replace(/\$Components/g, "children"));
+  public native void openProjectInJSDesigner(String rawDesignFileContent, String rawBlocksFileContent)/*-{
+    console.log(rawDesignFileContent);
+    console.log(rawBlocksFileContent);
+    var parsedJson = JSON.parse(rawDesignFileContent.replace(/^\#\|\s\$JSON/, "").replace(/\|\#$/, "").replace(/\$Name/g, "name").replace(/\$Type/g, "componentType").replace(/\$Version/g, "version").replace(/\$Components/g, "children"));
     var flattenedArray = [];
 
     var jsonNodes = [parsedJson.Properties];
@@ -51,25 +79,52 @@ public class JSDesignerPanel extends HTMLPanel {
       }
       flattenedArray.push(component);
     }
-    $wnd.jsDesignerLoadProject(rawFileContent);
+    $wnd.jsDesignerLoadProject(rawDesignFileContent, rawBlocksFileContent);
   }-*/;
 
-  private static void loadProjectFromFile()/*-{
-    openProjectInJSDesigner(fileEditor.getRawFileContent());
-  }-*/;
+  private void loadProjectFromFile(){
+    openProjectInJSDesigner(designFileContent, blocksFileContent); 
+  };
+
+  private String getRawFileContent() {
+    return fileContent;
+  }
+
+  private String getDesignFileContent() {
+    return designFileContent;
+  }
+
+  private String getBlocksFileContent() {
+    return blocksFileContent;
+  }
+
+  private void switchToBlocksEditor() {
+    //OdeLog.log("Switcing to Blocks Editor");
+    Ode.getInstance().getDesignToolbar().publicSwitchToBlocksEditor();
+  }
+
+  private void switchToFormEditor() {
+    Ode.getInstance().getDesignToolbar().publicSwitchToFormEditor();
+  }
 
   public native void exportJSFunctions()/*-{
     $wnd.jsDesignerToJS = {
       getProjectJSON: $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getProjectJSON()).bind(this))
     };
-    $wnd.jsDesignerLoadProjectFromFile = {
-      $entry(@com.google.appinventor.client.jsdesigner.JSDesignerPanel::loadProjectFromFile());
-    }
+    $wnd.jsDesignerLoadProjectFromFile = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::loadProjectFromFile()).bind(this));
+    //$wnd.jsGetRawFileContent = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getRawFileContent()).bind(this));
+    $wnd.jsGetDesignFileContent = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getDesignFileContent()).bind(this));
+    $wnd.jsGetBlocksFileContent = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getBlocksFileContent()).bind(this));
+    $wnd.jsDesignerSwitchToBlocksEditor = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::switchToBlocksEditor()).bind(this));
+    $wnd.jsDesignerSwitchToFormEditor = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::switchToFormEditor()).bind(this));
   }-*/;
 
   public String getProjectJSON() {
     if (this.fileEditor != null) {
-      return this.fileEditor.getRawFileContent();
+      //return this.fileEditor.getRawFileContent();
+
+      //Changed this since fileEditor is overloaded with both the Designer and BlocksEditors
+      return this.designFileContent;
     }
     return "{}";
   }

@@ -361,13 +361,14 @@ public class DesignToolbar extends Toolbar {
       toggleEditor(false);
       Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
     } else {  // must be View.BLOCKS
+      OdeLog.log("Switching to blocks editor");
       projectEditor.selectFileEditor(screen.blocksEditor);
       toggleEditor(true);
       Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
     }
     // Inform the Blockly Panel which project/screen (aka form) we are working on
     BlocklyPanel.setCurrentForm(projectId + "_" + newScreenName);
-    screen.blocksEditor.makeActiveWorkspace();
+    //screen.blocksEditor.makeActiveWorkspace();
   }
 
   private class SwitchSketchAction implements Command {
@@ -451,6 +452,16 @@ public class DesignToolbar extends Toolbar {
     Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
     BlocklyPanel.setCurrentForm(projectId + "_" + sketchId);
     sketch.blocksEditor.makeActiveWorkspace();
+  }
+
+  public void publicSwitchToBlocksEditor() {
+    SwitchToBlocksEditorAction action = new SwitchToBlocksEditorAction();
+    action.execute();
+  }
+
+  public void publicSwitchToFormEditor() {
+    SwitchToFormEditorAction action = new SwitchToFormEditorAction();
+    action.execute();
   }
 
   private class SwitchToBlocksEditorAction implements Command {
@@ -587,6 +598,7 @@ public class DesignToolbar extends Toolbar {
     designToolbar.doSwitchScreen(projectId, screenName, View.BLOCKS);
     return true;
   }
+
 
   public static void popScreen() {
     DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();

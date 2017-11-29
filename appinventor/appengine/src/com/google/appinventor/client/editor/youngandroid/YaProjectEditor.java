@@ -439,7 +439,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
         if (pos < 0) {
           pos = -pos - 1;
         }
-        insertFileEditor(newDesigner, pos);
+        // insertFileEditor(newDesigner, pos);
         if (isScreen1(entityName)) {
           screen1FormLoaded = true;
           if (readyToShowScreen1()) {
