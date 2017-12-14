@@ -136,6 +136,18 @@ public class DesignToolbar extends Toolbar {
     public void removeSketch(String name) {
       iotSketches.remove(name);
     }
+
+    // Debugging use, (Lynda) TODO: remove
+    public String getScreensString() {
+      String str = "";
+      for(Map.Entry<String, Screen> entry : screens.entrySet()) {
+        String key = entry.getKey();
+        String screenName = entry.getValue().screenName;
+
+        str = str + "Key " + key + " screenName " + screenName;
+      }
+      return str;
+    }
   }
 
   private static final String WIDGET_NAME_ADDFORM = "AddForm";

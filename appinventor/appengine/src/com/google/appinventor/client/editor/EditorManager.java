@@ -231,22 +231,8 @@ public final class EditorManager {
   }
 
 
-  // public native String getJSDesignerRawFileContent() /*-{
-  //   var screenFileContent = $wnd.getScreenFileContent();
-  //   console.log("getting Screen File Content from React");
-  //   console.log(screenFileContent);
-  //   if (screenFileContent !== undefined && screenFileContent !== null) {
-  //     return screenFileContent;
-  //   } else {
-  //     return "";
-  //   }
-  // }-*/;
-
-
   public native String getJSDesignerSelectedScreenContent(String screenName, String screenType) /*-{
     var screenFileContent = $wnd.getSelectedScreenFileContent(screenName, screenType);
-    console.log("getting Screen File Content from React");
-    console.log(screenFileContent);
     if (screenFileContent !== undefined && screenFileContent !== null) {
       return screenFileContent;
     } else {
@@ -284,12 +270,8 @@ public final class EditorManager {
       String fileName = fileEditor.getFileId().substring(fileEditor.getFileId().lastIndexOf("/")+1);
       String screenName = fileName.substring(0, fileName.lastIndexOf("."));
       String screenType = fileName.substring(fileName.lastIndexOf(".")+1);
-      // Window.alert(fileEditor.getFileId());
-      // Window.alert(Integer.toString(fileEditor.getFileId().lastIndexOf("/")));
-      // Window.alert(fileEditor.getFileId().substring(fileEditor.getFileId().lastIndexOf("/")+1));
       String rawFileContent = fileEditor.getProjectId() == currentFileEditor.getProjectId() ?
         getJSDesignerSelectedScreenContent(screenName, screenType) : fileEditor.getRawFileContent();
-      Window.alert(rawFileContent);
       FileDescriptorWithContent fileContent = new FileDescriptorWithContent(
           fileEditor.getProjectId(), fileEditor.getFileId(), rawFileContent);
       filesToSave.add(fileContent);
