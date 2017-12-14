@@ -66,9 +66,9 @@ Blockly.Blocks.Utilities.IotTypeToBlocklyTypeMap = {
 
 Blockly.Blocks.Utilities.IotTypeToBlocklyType = function(type, direction) {
   var directionName = direction === Blockly.Blocks.Utilities.OUTPUT ? 'output' : 'input';
-  var blockType = Blockly.Blocks.Utilities.IotTypeToBlocklyType[type][directionName];
+  var blockType = Blockly.Blocks.Utilities.IotTypeToBlocklyTypeMap[type][directionName];
 
-  if (blockType !== null || type === 'any') {
+  if (blockType !== null || type === 'any' || type === 'value') {
     return blockType;
   } else {
     throw new Error('Unknown IOT type: ' + type);

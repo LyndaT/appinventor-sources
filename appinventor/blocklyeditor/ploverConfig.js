@@ -163,6 +163,10 @@
     "./src/generators/yail/variables.js",
     "./src/generators/yail/procedures.js",
 
+    //iot generator files
+    "./src/generators/iot.js",
+    "./src/generators/iot-bc/math.js",
+
     // Target info
     "./src/target.js",
 

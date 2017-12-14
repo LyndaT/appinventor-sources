@@ -430,6 +430,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       editors.formEditor = newDesigner;
       editorMap.put(entityName, editors);
     }
+    addFileEditorByType(newDesigner);
     newDesigner.loadFile(new Command() {
       @Override
       public void execute() {
@@ -470,6 +471,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       editors.blocksEditor = newBlocksEditor;
       editorMap.put(entityName, editors);
     }
+    addFileEditorByType(newBlocksEditor);
   }
   
   private void removeFormEditor(String formName) {

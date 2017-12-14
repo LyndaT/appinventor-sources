@@ -470,7 +470,7 @@ Blockly.Blocks.component_method = {
     for (var i = 0, param; param = params[i]; i++) {
       var newInput = this.appendValueInput("ARG" + i).appendField(componentDb.getInternationalizedParameterName(param.name));
       newInput.setAlign(Blockly.ALIGN_RIGHT);
-      var blockyType = Blockly.Blocks.Utilities.YailTypeToBlocklyType(param.type,Blockly.Blocks.Utilities.INPUT);
+      var blockyType = this.getTopWorkspace().getComponentDatabase().typeMappingFunction(param.type,Blockly.Blocks.Utilities.INPUT);
       newInput.connection.setCheck(blockyType);
     }
 
@@ -480,7 +480,7 @@ Blockly.Blocks.component_method = {
       this.setNextStatement(false);
     } // methodType.returnType is a Yail type
     else if (methodTypeObject.returnType) {
-      this.setOutput(true, Blockly.Blocks.Utilities.YailTypeToBlocklyType(methodTypeObject.returnType,Blockly.Blocks.Utilities.OUTPUT));
+      this.setOutput(true, this.getTopWorkspace().getComponentDatabase().typeMappingFunction(methodTypeObject.returnType,Blockly.Blocks.Utilities.OUTPUT));
     } else {
       this.setPreviousStatement(true);
       this.setNextStatement(true);
@@ -616,7 +616,7 @@ Blockly.Blocks.component_method = {
               modifiedParameters = true;
               break; // invalid input or connection
             }
-            var blockyType = Blockly.Blocks.Utilities.YailTypeToBlocklyType(param.type,Blockly.Blocks.Utilities.INPUT);
+            var blockyType = this.getTopWorkspace().getComponentDatabase().typeMappingFunction(param.type,Blockly.Blocks.Utilities.INPUT);
             input.connection.setCheck(blockyType); // correct type
             found = true;
             break;
@@ -633,7 +633,7 @@ Blockly.Blocks.component_method = {
           modifiedReturnType = true; // missing return type
         }
         else {
-          this.outputConnection.setCheck(Blockly.Blocks.Utilities.YailTypeToBlocklyType(method.returnType,Blockly.Blocks.Utilities.OUTPUT));
+          this.outputConnection.setCheck(this.getTopWorkspace().getComponentDatabase().typeMappingFunction(method.returnType,Blockly.Blocks.Utilities.OUTPUT));
         }
       }
       else if (!method.returnType) {
@@ -826,7 +826,7 @@ Blockly.Blocks.component_set_get = {
     if (this.getPropertyObject(propertyName)) {
       yailType = this.getPropertyObject(propertyName).type;
     }
-    return Blockly.Blocks.Utilities.YailTypeToBlocklyType(yailType,inputOrOutput);
+    return this.getTopWorkspace().getComponentDatabase().typeMappingFunction(yailType,inputOrOutput);
   },
   getPropertyDropDownList : function() {
     var componentDb = this.getTopWorkspace().getComponentDatabase();

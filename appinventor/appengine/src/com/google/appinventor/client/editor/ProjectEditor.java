@@ -104,28 +104,6 @@ public abstract class ProjectEditor extends Composite {
   protected abstract void onHide();
 
   /**
-   * Adds a file editor to this project editor.
-   *
-   * @param fileEditor  file editor to add
-   */
-  public final void addFileEditor(FileEditor fileEditor) {
-    String fileId = fileEditor.getFileId();
-    openFileEditors.put(fileId, fileEditor);
-    fileIds.add(fileId);
-    
-    deckPanel.add(fileEditor);
-
-    String entityName = SourceNode.getEntityName(fileEditor.getFileId());
-    if (!editorsByType.containsKey(entityName)) {
-      Map<String, FileEditor> editorMap = new HashMap<>();
-      editorMap.put(fileEditor.getEditorType(), fileEditor);
-      editorsByType.put(entityName, editorMap);
-    } else {
-      editorsByType.get(entityName).put(fileEditor.getEditorType(), fileEditor);
-    }
-  }
-
-  /**
    * Inserts a file editor in this editor at the specified index.
    *
    * @param fileEditor  file editor to insert
@@ -137,7 +115,17 @@ public abstract class ProjectEditor extends Composite {
     fileIds.add(beforeIndex, fileId);
     deckPanel.insert(fileEditor, beforeIndex);
     OdeLog.log("Inserted file editor for " + fileEditor.getFileId() + " at pos " + beforeIndex);
+  }
 
+  protected final void addFileEditorByType(FileEditor fileEditor) {
+    String entityName = SourceNode.getEntityName(fileEditor.getFileId());
+    if (!editorsByType.containsKey(entityName)) {
+      Map<String, FileEditor> editorMap = new HashMap<>();
+      editorMap.put(fileEditor.getEditorType(), fileEditor);
+      editorsByType.put(entityName, editorMap);
+    } else {
+      editorsByType.get(entityName).put(fileEditor.getEditorType(), fileEditor);
+    }
   }
 
   /**

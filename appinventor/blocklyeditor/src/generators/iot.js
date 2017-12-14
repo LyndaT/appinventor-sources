@@ -144,3 +144,7 @@ AI.Blockly.Iot.createProgram = function(state) {
   }
   state.program.push(progLen & 0xFF, (progLen >> 8) & 0xFF);
 };
+
+AI.Blockly.Iot.scrub_ = function(block, code) {
+  return code;
+}
