@@ -29,6 +29,10 @@ import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.DesignToolbar.DesignProject;
 import com.google.appinventor.client.DesignToolbar.Screen;
 
+import com.google.gwt.json.client.JSONArray;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class JSDesignerPanel extends HTMLPanel {
   private FileEditor fileEditor;
@@ -87,6 +91,26 @@ public class JSDesignerPanel extends HTMLPanel {
     $wnd.jsDesignerLoadProject(rawDesignFileContent, rawBlocksFileContent);
   }-*/;
 
+  public native void sendAddedScreenSuccess(String screenName)/*-{
+    $wnd.sendAddedScreenSuccess(screenName);
+  }-*/;
+
+  public native void sendAddedScreenFailure()/*-{
+    $wnd.sendAddedScreenFailure();
+  }-*/;
+
+  // Returns a String of the project screens separated by commas.
+  // Probably will change to something Rob Miller approved.
+  private String getProjectScreens() {
+    List<String> result = new ArrayList(project.screens.keySet());
+    String screenStr = "";
+    screenStr = screenStr + result.get(0);
+    for (int i = 1; i < result.size(); i++) {
+      screenStr = screenStr + "," + result.get(i);
+    }
+    return screenStr;
+  }
+
   private void loadProjectFromFile(){
     openProjectInJSDesigner(designFileContent, blocksFileContent); 
   };
@@ -95,13 +119,23 @@ public class JSDesignerPanel extends HTMLPanel {
     return fileContent;
   }
 
-  private String getDesignFileContent() {
+  private String getDesignFileContent(final String screenName) {
+    Screen selectedScreen = project.screens.get(screenName);
+    return selectedScreen.designerEditor.getRawFileContent();
+  }
+
+  private String getBlocksFileContent(final String screenName) {
+    Screen selectedScreen = project.screens.get(screenName);
+    return selectedScreen.blocksEditor.getRawFileContent();
+  }
+
+  private String getDesignFileContentForCurrentString() {
     return designFileContent;
   }
 
-  private String getBlocksFileContent() {
+  private String getBlocksFileContentForCurrentString() {
     return blocksFileContent;
-  }
+  } 
 
   private void switchToBlocksEditor() {
     //OdeLog.log("Switching to Blocks Editor");
@@ -122,8 +156,9 @@ public class JSDesignerPanel extends HTMLPanel {
       final String formFileId = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
       final String blocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
 
-      Window.alert(formFileId);
-      Window.alert(blocksFileId);
+      // Window.alert(formFileId);
+      // Window.alert(blocksFileId);
+      Window.alert(Long.toString(projectRootNode.getProjectId()));
 
       OdeAsyncCallback<Long> callback = new OdeAsyncCallback<Long>(
           // failure message
@@ -150,12 +185,15 @@ public class JSDesignerPanel extends HTMLPanel {
 
           // This will be done on the side of JS
 
-          // Call React functions in here 
+          // Call React functions for successfully adding a screen
+          sendAddedScreenSuccess(newScreenName);
         }
 
         @Override
         public void onFailure(Throwable caught) {
           Window.alert("failure");
+          // Call React functions for failing to adding a screen
+          sendAddedScreenFailure();
         }
       };
 
@@ -171,8 +209,14 @@ public class JSDesignerPanel extends HTMLPanel {
     };
     $wnd.jsDesignerLoadProjectFromFile = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::loadProjectFromFile()).bind(this));
     //$wnd.jsGetRawFileContent = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getRawFileContent()).bind(this));
-    $wnd.jsGetDesignFileContent = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getDesignFileContent()).bind(this));
-    $wnd.jsGetBlocksFileContent = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getBlocksFileContent()).bind(this));
+
+    $wnd.jsGetDesignFileContent = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getDesignFileContent(Ljava/lang/String;)).bind(this));
+    $wnd.jsGetBlocksFileContent = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getBlocksFileContent(Ljava/lang/String;)).bind(this));
+
+    // $wnd.jsGetDesignFileContentForScreen = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getDesignFileContent(Ljava/lang/String;)).bind(this));
+    // $wnd.jsGetBlocksFileContentForScreen = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getBlocksFileContent(Ljava/lang/String;)).bind(this));
+
+    $wnd.jsDesignerGetProjectScreens = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getProjectScreens()).bind(this));
     $wnd.jsDesignerSwitchToBlocksEditor = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::switchToBlocksEditor()).bind(this));
     $wnd.jsDesignerSwitchToFormEditor = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::switchToFormEditor()).bind(this));
     $wnd.jsDesignerAddScreen = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::addScreen(Ljava/lang/String;)).bind(this));

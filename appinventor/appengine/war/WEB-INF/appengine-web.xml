@@ -16,10 +16,10 @@
     <include path="/gwt.css" expiration="1d" />
     <include path="/Ya.css" expiration="1d" />
     <include path="/main.9de011e5.js" expiration="1d" />
-    <include path="/main.js" expiration="1d" />
-    <include path="/main.js.map" expiration="1d" />
-    <include path="/0.js" expiration="1d" />
-    <include path="/0.js.map" expiration="1d" />
+    <include path="/main.js" expiration="0s" />
+    <include path="/main.js.map" expiration="0s" />
+    <include path="/0.js" expiration="0s" />
+    <include path="/0.js.map" expiration="0s" />
     <include path="/*" expiration="1d" />
     <include path="/templates/**" expiration="1d" />
     <include path="/reference/**" expiration="1d" />

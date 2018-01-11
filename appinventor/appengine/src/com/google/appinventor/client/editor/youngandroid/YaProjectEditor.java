@@ -6,6 +6,8 @@
 
 package com.google.appinventor.client.editor.youngandroid;
 
+import com.google.gwt.user.client.Window;
+
 import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.ErrorReporter;
 import com.google.appinventor.client.Ode;
@@ -169,6 +171,8 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     // need access to their corresponding form editors to set up properly
     for (ProjectNode source : projectRootNode.getAllSourceNodes()) {
       if (source instanceof YoungAndroidFormNode) {
+        Window.alert("loading project" + Long.toString(projectRootNode.getProjectId()));
+        Window.alert(((YoungAndroidFormNode) source).getFormName());
         addDesigner(((YoungAndroidFormNode) source).getFormName(),
             new YaFormEditor(this, (YoungAndroidFormNode) source));
       } else if (source instanceof IotMicrocontrollerNode) {
@@ -422,6 +426,8 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
   
   private void addDesigner(final String entityName, final DesignerEditor<?, ?, ?, ?> newDesigner) {
+    // Loggin entity name = "Screen2"?
+    Window.alert(entityName);
     if (editorMap.containsKey(entityName)) {
       // This happens if the blocks editor was already added.
       editorMap.get(entityName).formEditor = newDesigner;
@@ -439,7 +445,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
         if (pos < 0) {
           pos = -pos - 1;
         }
-        // insertFileEditor(newDesigner, pos);
+        insertFileEditor(newDesigner, pos);
         if (isScreen1(entityName)) {
           screen1FormLoaded = true;
           if (readyToShowScreen1()) {
