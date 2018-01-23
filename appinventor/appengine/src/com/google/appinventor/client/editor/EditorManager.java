@@ -231,12 +231,21 @@ public final class EditorManager {
   }
 
 
-  public native String getJSDesignerSelectedScreenContent(String screenName, String screenType) /*-{
-    var screenFileContent = $wnd.getSelectedScreenFileContent(screenName, screenType);
+  public native String getJSDesignerSelectedScreenContent(String projectId, String screenName, String screenType) /*-{
+    var screenFileContent = $wnd.getScreenFileContent(projectId, screenName, screenType);
+    //var screenFileContent = $wnd.getSelectedScreenFileContent(screenName, screenType);
     if (screenFileContent !== undefined && screenFileContent !== null) {
       return screenFileContent;
     } else {
       return "";
+    }
+  }-*/;
+
+  public native String getJSDesignerScreenExists(String projectId, String screenName) /*-{
+    if ($wnd.screenExists(projectId, screenName)) {
+      return $wnd.screenExists(projectId, screenName);
+    } else {
+      return "true";
     }
   }-*/;
 
@@ -265,16 +274,25 @@ public final class EditorManager {
     // TODO (spefley): put save stuff here
     FileEditor currentFileEditor = Ode.getInstance().getCurrentFileEditor();
     Set<FileEditor> fileEditorsToSave = dirtyFileEditors;
-    fileEditorsToSave.add(currentFileEditor);
+    if (currentFileEditor != null) {
+      fileEditorsToSave.add(currentFileEditor);
+    }
     for (FileEditor fileEditor : fileEditorsToSave) {
+      // Window.alert("Saving " + fileEditor.getFileId());
       String fileName = fileEditor.getFileId().substring(fileEditor.getFileId().lastIndexOf("/")+1);
       String screenName = fileName.substring(0, fileName.lastIndexOf("."));
       String screenType = fileName.substring(fileName.lastIndexOf(".")+1);
-      String rawFileContent = fileEditor.getProjectId() == currentFileEditor.getProjectId() ?
-        getJSDesignerSelectedScreenContent(screenName, screenType) : fileEditor.getRawFileContent();
-      FileDescriptorWithContent fileContent = new FileDescriptorWithContent(
-          fileEditor.getProjectId(), fileEditor.getFileId(), rawFileContent);
-      filesToSave.add(fileContent);
+      OdeLog.log(getJSDesignerScreenExists(Long.toString(fileEditor.getProjectId()), screenName));
+      if (getJSDesignerScreenExists(Long.toString(fileEditor.getProjectId()), screenName) == "true") {
+        OdeLog.log("Saving existing screen");
+        String rawFileContent = getJSDesignerSelectedScreenContent(Long.toString(fileEditor.getProjectId()), screenName, screenType);
+        // Even if the currentFileEditor project() == fileEditor.getProjectId(), the data may be bad, so get from JS every time
+        // String rawFileContent = fileEditor.getProjectId() == currentFileEditor.getProjectId() ?
+        //   getJSDesignerSelectedScreenContent(screenName, screenType) : fileEditor.getRawFileContent();
+        FileDescriptorWithContent fileContent = new FileDescriptorWithContent(
+            fileEditor.getProjectId(), fileEditor.getFileId(), rawFileContent);
+        filesToSave.add(fileContent);
+      }
     }
     dirtyFileEditors.clear();
 

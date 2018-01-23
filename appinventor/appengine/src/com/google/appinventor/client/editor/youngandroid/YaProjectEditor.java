@@ -122,9 +122,10 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
 
   private void loadBlocksEditor(String formNamePassedIn) {
-
+    OdeLog.log(formNamePassedIn);
     final String formName = formNamePassedIn;
     final BlocksEditor<?, DesignerEditor<?, ?, ?, ?>> newBlocksEditor = (BlocksEditor) editorMap.get(formName).blocksEditor;
+    OdeLog.log(newBlocksEditor.getFileId());
     newBlocksEditor.setDesigner(editorMap.get(formName).formEditor);
     newBlocksEditor.loadFile(new Command() {
         @Override
@@ -171,8 +172,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     // need access to their corresponding form editors to set up properly
     for (ProjectNode source : projectRootNode.getAllSourceNodes()) {
       if (source instanceof YoungAndroidFormNode) {
-        Window.alert("loading project" + Long.toString(projectRootNode.getProjectId()));
-        Window.alert(((YoungAndroidFormNode) source).getFormName());
+        OdeLog.log("Adding form editors to project");
         addDesigner(((YoungAndroidFormNode) source).getFormName(),
             new YaFormEditor(this, (YoungAndroidFormNode) source));
       } else if (source instanceof IotMicrocontrollerNode) {
@@ -181,6 +181,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       }
     }
     for (ProjectNode source : projectRootNode.getAllSourceNodes()) {
+      OdeLog.log("Adding block editors to project");
       if (source instanceof YoungAndroidBlocksNode) {
         addBlocksEditor(((YoungAndroidBlocksNode) source).getFormName(),
             new YaBlocksEditor(this, (YoungAndroidBlocksNode) source));
@@ -426,8 +427,6 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
   
   private void addDesigner(final String entityName, final DesignerEditor<?, ?, ?, ?> newDesigner) {
-    // Loggin entity name = "Screen2"?
-    Window.alert(entityName);
     if (editorMap.containsKey(entityName)) {
       // This happens if the blocks editor was already added.
       editorMap.get(entityName).formEditor = newDesigner;

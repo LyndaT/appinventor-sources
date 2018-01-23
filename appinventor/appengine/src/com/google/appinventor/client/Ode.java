@@ -1329,6 +1329,7 @@ public class Ode implements EntryPoint {
       return;
     }
     OdeLog.log("Ode: Setting current file editor to " + currentFileEditor.getFileId());
+    // Window.alert("Setting current file editor to: " + currentFileEditor.getFileId());
     JSDesignerBox.getJSDesignerBox().getJSDesignerPanel().loadFile(currentFileEditor);
     switchToJSDesignView(); // TODO (spefley): interesting
     if (!windowClosing) {

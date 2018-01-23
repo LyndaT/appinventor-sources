@@ -350,9 +350,11 @@ public abstract class DesignerEditor<S extends SourceNode, T extends DesignerRoo
           return;
         }
         final FileContentHolder fileContentHolder = new FileContentHolder(contents);
+        OdeLog.log(contents);
         upgradeFile(fileContentHolder, new Command() {
           @Override
           public void execute() {
+            OdeLog.log("FileEditor calling onFileLoaded in YAFormEditor");
             onFileLoaded(fileContentHolder.getFileContent());
             if (afterFileLoaded != null) {
               afterFileLoaded.execute();

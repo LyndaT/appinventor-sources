@@ -29,6 +29,8 @@ import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.iot.IotSourceNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 
+import com.google.appinventor.client.jsdesigner.JSDesignerBox;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -137,7 +139,7 @@ public class DesignToolbar extends Toolbar {
       iotSketches.remove(name);
     }
 
-    // Debugging use, (Lynda) TODO: remove
+    // Debugging use, (Lynda) 
     public String getScreensString() {
       String str = "";
       for(Map.Entry<String, Screen> entry : screens.entrySet()) {
@@ -368,6 +370,7 @@ public class DesignToolbar extends Toolbar {
     currentProject.setCurrentScreen(newScreenName);
     setDropDownButtonCaption(WIDGET_NAME_SCREENS_DROPDOWN, newScreenName);
     OdeLog.log("Setting currentScreen to " + newScreenName);
+    OdeLog.log("DesignToolbar: Current project = " + currentProject.name);
     if (currentView == View.DESIGNER) {
       projectEditor.selectFileEditor(screen.designerEditor);
       toggleEditor(false);
@@ -381,6 +384,9 @@ public class DesignToolbar extends Toolbar {
     // Inform the Blockly Panel which project/screen (aka form) we are working on
     BlocklyPanel.setCurrentForm(projectId + "_" + newScreenName);
     //screen.blocksEditor.makeActiveWorkspace();
+
+    // Switch the screen in JS (done when editor is being switched in Ode.setCurrentFileEditor)
+    // JSDesignerBox.getJSDesignerBox().getJSDesignerPanel().loadFile(Ode.getInstance().getCurrentFileEditor());
   }
 
   private class SwitchSketchAction implements Command {

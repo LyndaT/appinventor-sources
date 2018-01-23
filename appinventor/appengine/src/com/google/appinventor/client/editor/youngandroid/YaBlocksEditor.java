@@ -19,6 +19,8 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocks
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.gwt.core.client.JavaScriptObject;
 
+import com.google.appinventor.client.output.OdeLog;
+
 /**
  * Editor for Young Android Blocks (.blk) files.
  *
