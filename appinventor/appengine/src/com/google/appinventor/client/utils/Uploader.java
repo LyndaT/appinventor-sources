@@ -14,6 +14,8 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormSubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormSubmitEvent;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Hidden;
+import com.google.appinventor.client.output.OdeLog;
 
 /**
  * Utility class to upload files to the server.
@@ -92,6 +94,19 @@ public final class Uploader {
    */
   public final void upload(FileUpload upload, String uploadUrl,
       AsyncCallback<UploadResponse> callback) {
+    this.callback = callback;
+
+    form.setWidget(upload);
+    form.setAction(uploadUrl);
+    form.submit();
+  }
+
+  /**
+  *
+  */
+  public final void uploadJS(Hidden upload, String uploadUrl, 
+    AsyncCallback<UploadResponse> callback) {
+    OdeLog.log(uploadUrl);
     this.callback = callback;
 
     form.setWidget(upload);

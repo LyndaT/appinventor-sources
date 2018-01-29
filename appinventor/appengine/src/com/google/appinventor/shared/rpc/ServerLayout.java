@@ -173,6 +173,12 @@ public class ServerLayout {
 
   /**
    * Relative path within {@link com.google.appinventor.server.UploadServlet}
+   * for uploading a file in js
+   */
+  public static final String UPLOAD_FILEJS = "filejs";
+
+  /**
+   * Relative path within {@link com.google.appinventor.server.UploadServlet}
    * for uploading a user file
    */
   public static final String UPLOAD_USERFILE = "userfile";

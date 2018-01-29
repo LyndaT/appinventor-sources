@@ -20,10 +20,18 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.ByteArrayInputStream;
+import javax.xml.bind.DatatypeConverter;
 import java.util.logging.Logger;
+import java.lang.StringBuilder;
+
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.gwt.user.server.Base64Utils;
 
 /**
  * Servlet for uploading files.
@@ -35,6 +43,7 @@ public class UploadServlet extends OdeServlet {
    * URIs for upload requests are structured as follows:
    *    /<baseurl>/upload/project/<projectname>}
    *    /<baseurl>/upload/file/<projectId>/<filePath>
+   *    /<baseurl>/upload/filejs/<projectId>/<filePath>
    *    /<baseurl>/upload/userfile/<filePath>
    */
 
@@ -118,6 +127,34 @@ public class UploadServlet extends OdeServlet {
           throw CrashReport.createAndLogError(LOG, req, null, e);
         }
 
+        try {
+          long modificationDate = fileImporter.importFile(userInfoProvider.getUserId(),
+              projectId, fileName, uploadedStream);
+          uploadResponse = new UploadResponse(UploadResponse.Status.SUCCESS, modificationDate);
+        } catch (FileImporterException e) {
+          uploadResponse = e.uploadResponse;
+        }
+      } else if (uploadKind.equals(ServerLayout.UPLOAD_FILEJS)) {
+        uriComponents = uri.split("/", SPLIT_LIMIT_FILE);
+        long projectId = Long.parseLong(uriComponents[PROJECT_ID_INDEX]);
+        String fileName = uriComponents[FILE_PATH_INDEX];
+        InputStream uploadedStream;
+        try {
+          uploadedStream = getRequestStream(req, ServerLayout.UPLOAD_FILE_FORM_ELEMENT);
+          StringBuilder stringBuilder = new StringBuilder();
+          String line = null;
+          try (BufferedReader reader = new BufferedReader(new InputStreamReader(uploadedStream))) {
+            while ((line = reader.readLine()) != null) {
+              stringBuilder.append(line);
+            }
+          } catch (Exception e) {
+            throw CrashReport.createAndLogError(LOG, req, null, e);
+          }
+          byte[] decodedBytes = DatatypeConverter.parseBase64Binary(stringBuilder.toString());
+          uploadedStream = new ByteArrayInputStream(decodedBytes);
+        } catch (Exception e) {
+          throw CrashReport.createAndLogError(LOG, req, null, e);
+        }
         try {
           long modificationDate = fileImporter.importFile(userInfoProvider.getUserId(),
               projectId, fileName, uploadedStream);

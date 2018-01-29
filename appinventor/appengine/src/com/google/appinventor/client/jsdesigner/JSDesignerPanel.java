@@ -7,6 +7,9 @@ package com.google.appinventor.client.jsdesigner;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
@@ -16,6 +19,11 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.core.client.Scheduler;
 
+import com.google.gwt.core.client.GWT;
+import com.google.appinventor.shared.rpc.ServerLayout;
+import com.google.appinventor.shared.rpc.UploadResponse;
+import com.google.appinventor.shared.rpc.project.FileNode;
+import com.google.appinventor.shared.rpc.project.FolderNode;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
@@ -24,6 +32,8 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackag
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidYailNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetNode;
+
 
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.editor.designer.DesignerEditor;
@@ -34,12 +44,14 @@ import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.DesignToolbar.DesignProject;
 import com.google.appinventor.client.DesignToolbar.Screen;
-import com.google.appinventor.shared.rpc.project.FileNode;
+import com.google.appinventor.client.utils.Uploader;
+import com.google.appinventor.client.ErrorReporter;
+import com.google.appinventor.client.wizards.FileUploadWizard.FileUploadedCallback;
+import com.google.appinventor.client.boxes.AssetListBox;
 
 import com.google.gwt.json.client.JSONArray;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.user.server.Base64Utils;
+import com.google.gwt.user.client.ui.Hidden;
 
 public class JSDesignerPanel extends HTMLPanel {
 
@@ -165,6 +177,17 @@ public class JSDesignerPanel extends HTMLPanel {
   * Getters
   ******************************/
 
+  private String getProjectAssets() {
+    String assetString = "";
+    final YoungAndroidProjectNode projectRootNode = (YoungAndroidProjectNode) ode.getCurrentYoungAndroidProjectRootNode();
+    FolderNode assetsFolder = projectRootNode.getAssetsFolder();
+    for (ProjectNode node : assetsFolder.getChildren()) {
+      OdeLog.log(node.getName() + " " + node.getFileId());
+      assetString = assetString + "," + node.getName();
+    } 
+    return assetString.substring(1);
+  }
+
   private String getDesignFileContent(final String screenName) {
     Screen selectedScreen = project.screens.get(screenName);
     return selectedScreen.designerEditor.getRawFileContent();
@@ -194,13 +217,8 @@ public class JSDesignerPanel extends HTMLPanel {
     return Long.toString(fileEditor.getProjectId());
   }
 
-  // private String getRawFileContent() {
-  //   return designFileContent;
-  // }
-
   /******************************
   * Switching editors
-  * (Maybe used for saving? Not sure if actually needed)
   ******************************/
 
   private void switchToBlocksEditor() {
@@ -387,6 +405,89 @@ public class JSDesignerPanel extends HTMLPanel {
   }-*/;
 
   /******************************
+  * Loading Files
+  ******************************/
+
+  private void onUploadSuccess(final FolderNode folderNode, final String filename,
+      long modificationDate, final FileUploadedCallback fileUploadedCallback) {
+    Ode.getInstance().updateModificationDate(folderNode.getProjectId(), modificationDate);
+    finishUpload(folderNode, filename, fileUploadedCallback);
+  }
+
+  private void finishUpload(FolderNode folderNode, String filename,
+      FileUploadedCallback fileUploadedCallback) {
+    String uploadedFileId = folderNode.getFileId() + "/" + filename;
+    FileNode uploadedFileNode;
+    uploadedFileNode = new YoungAndroidAssetNode(filename, uploadedFileId);
+
+    Project project = Ode.getInstance().getProjectManager().getProject(folderNode);
+    uploadedFileNode = (FileNode) project.addNode(folderNode, uploadedFileNode);
+
+    if (fileUploadedCallback != null) {
+      fileUploadedCallback.onFileUploaded(folderNode, uploadedFileNode);
+    }
+  }
+
+  private void uploadFile(final String fileData, final String fileName) {
+    final String actualData = fileData.substring(fileData.indexOf(',') + 1);
+    Hidden uploadedFile = new Hidden(ServerLayout.UPLOAD_FILE_FORM_ELEMENT, actualData);
+    final YoungAndroidProjectNode projectRootNode = (YoungAndroidProjectNode) ode.getCurrentYoungAndroidProjectRootNode();
+
+    // Use the folderNode's project id and file id in the upload URL so that the file is
+    // uploaded into that project and that folder in our back-end storage.
+    String uploadUrl = GWT.getModuleBaseURL() + ServerLayout.UPLOAD_SERVLET + "/" +
+        ServerLayout.UPLOAD_FILEJS + "/" + this.getProjectId() + "/" +
+        projectRootNode.getAssetsFolder().getFileId() + "/" + fileName;
+    OdeLog.log(uploadUrl);
+
+    final FileUploadedCallback callback = new FileUploadedCallback() {
+      @Override
+      public void onFileUploaded(FolderNode folderNode, FileNode fileNode) {
+        // At this point, the asset has been uploaded to the server, and
+        // has even been added to the assetsFolder. We are all set!
+        sendFileUploadedSuccess(fileName);
+        // Send to JS to make sure that you can add it!
+      }
+    };
+
+    Uploader.getInstance().uploadJS(uploadedFile, uploadUrl,
+        new OdeAsyncCallback<UploadResponse>(MESSAGES.fileUploadError()) {
+      @Override
+      public void onSuccess(UploadResponse uploadResponse) {
+        switch (uploadResponse.getStatus()) {
+        case SUCCESS:
+          ErrorReporter.hide();
+          onUploadSuccess(projectRootNode.getAssetsFolder(), fileName, uploadResponse.getModificationDate(),
+              callback);
+          break;
+        case FILE_TOO_LARGE:
+          // The user can resolve the problem by
+          // uploading a smaller file.
+          ErrorReporter.reportInfo(MESSAGES.fileTooLargeError());
+          break;
+        default:
+          ErrorReporter.reportError(MESSAGES.fileUploadError());
+          break;
+        }
+      }
+    });
+
+  }
+
+  public native void sendFileUploadedSuccess(String fileName)/*-{
+    console.log(fileName);
+    if ($wnd.sendFileUploadedSuccess) {
+      $wnd.sendFileUploadedSuccess(fileName);
+    }
+  }-*/;
+
+  public native void sendFileUploadedFailure()/*-{
+    if ($wnd.sendFileUploadedFailure) {
+      $wnd.sendFileUploadedFailure;
+    }
+  }-*/;
+
+  /******************************
   * Exporting to JS Functions
   ******************************/
 
@@ -401,6 +502,7 @@ public class JSDesignerPanel extends HTMLPanel {
     $wnd.jsDesignerGetProjectName = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getProjectName()).bind(this));
     $wnd.jsDesignerGetProjectScreens = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getProjectScreens()).bind(this));
     $wnd.jsDesignerGetCurrentProjectId = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getProjectId()).bind(this));
+    $wnd.jsDesignerGetProjectAssets = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::getProjectAssets()).bind(this));
 
     $wnd.jsDesignerSwitchToBlocksEditor = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::switchToBlocksEditor()).bind(this));
     $wnd.jsDesignerSwitchToFormEditor = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::switchToFormEditor()).bind(this));
@@ -408,6 +510,8 @@ public class JSDesignerPanel extends HTMLPanel {
 
     $wnd.jsDesignerAddScreen = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::addScreen(Ljava/lang/String;)).bind(this));
     $wnd.jsDesignerRemoveScreen = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::removeScreen(Ljava/lang/String;)).bind(this));
+
+    $wnd.jsDesignerUploadFile = $entry((this.@com.google.appinventor.client.jsdesigner.JSDesignerPanel::uploadFile(Ljava/lang/String; Ljava/lang/String;)).bind(this));
   }-*/;
 
   public String getProjectJSON() {
